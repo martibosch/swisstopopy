@@ -105,7 +105,7 @@ def get_tree_canopy_raster(
     # note that we need to pass the STAC client's CRS to both `_process_region_arg` and
     # `to_crs`, because `region` may have another CRS and we need the extend in the
     # client's CRS
-    client = stac.SwissTopoClient(region=region, region_crs=region_crs)
+    client = stac.SwissTopoClient(region, region_crs=region_crs)
     surface3d_gdf = client.gdf_from_collection(
         stac.SWISSSURFACE3D_COLLECTION_ID,
         datetime=surface3d_datetime,

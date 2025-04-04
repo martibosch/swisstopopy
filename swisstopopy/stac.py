@@ -168,16 +168,27 @@ class SwissTopoClient:
         collection_id: str,
         *,
         datetime: DatetimeLike | None = None,
-        collection_extents_crs: CRSType | None = None,
+        dst_crs: CRSType | None = None,
     ) -> gpd.GeoDataFrame:
-        """Get geo-data frame of tiles of a collection."""
-        if collection_extents_crs is None:
-            collection_extents_crs = self._client.get_collection(
-                collection_id
-            ).extra_fields["crs"][0]
+        """Get geo-data frame of tiles of a collection.
+
+        Parameters
+        ----------
+        collection_id : str
+            Collection ID to get the data for.
+        datetime : datetime-like, optional
+            Datetime-like object forwarded to `pystac_client.Client.search` to filter
+            the items. If None, all the items of the collection will be returned.
+        dst_crs : crs-like, optional
+            Coordinate reference system (CRS) of the returned geo-data frame. If None,
+            the CRS of the collection tiles will be used - note that this is not
+            (necessarily) the same as the CRS of the tile data itself.
+        """
+        if dst_crs is None:
+            dst_crs = self._client.get_collection(collection_id).extra_fields["crs"][0]
         search = self._client.search(
             collections=[collection_id], intersects=self.region, datetime=datetime
         )
         return gpd.GeoDataFrame(
             _postprocess_items_gdf(_items_to_gdf(search.items_as_dicts()))
-        ).set_crs(collection_extents_crs)
+        ).set_crs(dst_crs)

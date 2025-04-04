@@ -122,9 +122,26 @@ def get_latest(
 
 
 class SwissTopoClient:
-    """swisstopo client."""
+    """swisstopo client.
 
-    def __init__(self):
+    Parameters
+    ----------
+    region : region-like, optional
+        Region to get the data for. Can any argument accepted by the pyregeon library.
+        If None, all the collection data will be returned.
+    region_crs : crs-like, optional
+        Coordinate reference system (CRS) of the region. Required if `region` is a naive
+        geometry or a list of bounding box coordinates. Ignored if `region` already has
+        a CRS.
+
+    """
+
+    def __init__(
+        self,
+        *,
+        region: RegionType | None = None,
+        region_crs: CRSType = None,
+    ):
         """Initialize a swisstopo client."""
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
@@ -133,12 +150,23 @@ class SwissTopoClient:
         client.add_conforms_to("COLLECTIONS")
         self._client = client
 
+        if region is not None:
+            # rather than inheriting from `RegionMixin`, we just use the
+            # `_process_region_arg` static method
+            self.region = (
+                RegionMixin._process_region_arg(region, region_crs=region_crs)
+                .to_crs(CLIENT_CRS)
+                .iloc[0]
+            )
+        else:
+            # set it to so that it passes the default `None` value to the `intersects`
+            # keyword argument in `pystac_client.client.Search`.
+            self.region = None
+
     def gdf_from_collection(
         self,
         collection_id: str,
         *,
-        region: RegionType | None = None,
-        region_crs: CRSType = None,
         datetime: DatetimeLike | None = None,
         collection_extents_crs: CRSType | None = None,
     ) -> gpd.GeoDataFrame:
@@ -147,16 +175,8 @@ class SwissTopoClient:
             collection_extents_crs = self._client.get_collection(
                 collection_id
             ).extra_fields["crs"][0]
-        if region is not None:
-            # TODO: make the client bound to a region (i.e., inherit from `RegionMixin`)
-            # so that we only need to do this once?
-            region = (
-                RegionMixin._process_region_arg(region, region_crs=region_crs)
-                .to_crs(CLIENT_CRS)
-                .iloc[0]
-            )
         search = self._client.search(
-            collections=[collection_id], intersects=region, datetime=datetime
+            collections=[collection_id], intersects=self.region, datetime=datetime
         )
         return gpd.GeoDataFrame(
             _postprocess_items_gdf(_items_to_gdf(search.items_as_dicts()))

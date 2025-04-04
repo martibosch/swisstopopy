@@ -117,12 +117,11 @@ def get_bldg_gdf(
     )
 
     # use the STAC API to get building heights from swissSURFACE3D and swissALTI3D
-    client = stac.SwissTopoClient()
+    client = stac.SwissTopoClient(region=region_gser)
 
     # surface3d-raster (raster dsm)
     surface3d_gdf = client.gdf_from_collection(
         stac.SWISSSURFACE3D_RASTER_COLLECTION_ID,
-        region=region_gser,
         datetime=surface3d_datetime,
     )
     # filter to get tiff images only
@@ -134,7 +133,6 @@ def get_bldg_gdf(
     # alti3d (raster dem)
     alti3d_gdf = client.gdf_from_collection(
         stac.SWISSALTI3D_COLLECTION_ID,
-        region=region_gser,
         datetime=alti3d_datetime,
     )
     # filter to get tiff images only

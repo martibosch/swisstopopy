@@ -1,0 +1,167 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "swisstopopy"
+version = "0.0.0"
+description = "swisstopo geospatial Python utilities"
+readme = "README.md"
+authors = [
+  {email = "marti.bosch@epfl.ch", name = "Martí Bosch"}
+]
+classifiers = [
+  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13"
+]
+
+[project.license]
+text = "GPL-3.0"
+
+[project.optional-dependencies]
+dev = [
+  "build",
+  "commitizen",
+  "pip",
+  "pre-commit",
+  "toml",
+  "tox",
+  "twine"
+]
+doc = [
+  "myst-parser",
+  "nbsphinx",
+  "pydata-sphinx-theme",
+  "sphinx",
+  "sphinxemoji"
+]
+test = [
+  "coverage[toml]",
+  "pytest",
+  "pytest-cov",
+  "ruff"
+]
+
+[project.urls]
+Repository = "https://github.com/martibosch/swisstopopy"
+
+[tool.commitizen]
+major_version_zero = true
+name = "cz_conventional_commits"
+tag_format = "v$version"
+version_provider = "pep621"
+version_scheme = "semver"
+
+[tool.coverage.report]
+exclude_lines = [
+  "if self.debug:",
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "except ModuleNotFoundError",
+  "except ImportError"
+]
+ignore_errors = true
+omit = ["tests/*", "docs/conf.py"]
+
+[tool.coverage.run]
+source = ["swisstopopy"]
+
+[tool.ruff]
+line-length = 88
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
+select = [
+  "D",
+  "E",
+  "F",
+  "I"
+]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+  "swisstopopy"
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/__init__.py" = [
+  "F401",
+  "F403"
+]
+"tests/test_swisstopopy.py" = [
+  "D"
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.setuptools.packages.find]
+include = [
+  "swisstopopy",
+  "swisstopopy.*"
+]
+
+[tool.tox]
+env_list = [
+  "3.10",
+  "3.11",
+  "3.12",
+  "3.13",
+  "lint"
+]
+requires = [
+  "tox>=4.19"
+]
+
+[tool.tox.env.lint]
+commands = [
+  "python -m build",
+  "sphinx-build docs docs/_build",
+  "twine check dist/*"
+]
+extras = [
+  "dev",
+  "doc",
+  "test"
+]
+whitelist_externals = [
+  "build",
+  "sphinx-build",
+  "twine"
+]
+
+[tool.tox.env_run_base]
+commands = [
+  ["pytest", "-s", "--cov=swisstopopy", "--cov-report=xml", "tests"]
+]
+conda_deps = [
+  "gdal>=3.3"
+]
+extras = [
+  "test"
+]
+whitelist_externals = [
+  "pytest"
+]
+
+[tool.tox.gh.python]
+"3.10" = [
+  "3.10"
+]
+"3.11" = [
+  "3.11"
+]
+"3.12" = [
+  "3.12"
+]
+"3.13" = [
+  "3.13",
+  "lint"
+]

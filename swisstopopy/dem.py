@@ -47,7 +47,7 @@ def get_dem_raster(
         `settings.RIO_MERGE_DST_KWARGS` are used.
     """
     # use the STAC API to get the DEM from swissALTI3D
-    client = stac.SwissTopoClient(region=region, region_crs=region_crs)
+    client = stac.SwissTopoClient(region, region_crs=region_crs)
     alti3d_gdf = client.gdf_from_collection(
         stac.SWISSALTI3D_COLLECTION_ID,
         datetime=alti3d_datetime,

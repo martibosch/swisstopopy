@@ -126,9 +126,8 @@ class SwissTopoClient:
 
     Parameters
     ----------
-    region : region-like, optional
+    region : region-like
         Region to get the data for. Can any argument accepted by the pyregeon library.
-        If None, all the collection data will be returned.
     region_crs : crs-like, optional
         Coordinate reference system (CRS) of the region. Required if `region` is a naive
         geometry or a list of bounding box coordinates. Ignored if `region` already has
@@ -138,8 +137,8 @@ class SwissTopoClient:
 
     def __init__(
         self,
+        region: RegionType,
         *,
-        region: RegionType | None = None,
         region_crs: CRSType = None,
     ):
         """Initialize a swisstopo client."""

@@ -6,6 +6,7 @@ dependencies:
   - gdal=3.10.2
   - myst-parser=4.0.1
   - sphinx=8.2.3
+  - pdal=2.8.4
   - pip=25.0.1
   - pydata-sphinx-theme=0.16.1
   - setuptools=75.8.2

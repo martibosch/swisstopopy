@@ -112,7 +112,7 @@ def get_bldg_gdf(
             region_gser.to_crs(ox.settings.default_crs).iloc[0],
             tags=OSMNX_TAGS,
         )
-        .to_crs(stac.SWISSALTI3D_CRS)
+        .to_crs(stac.CH_CRS)
         .drop("node")
     )
 
@@ -157,7 +157,7 @@ def get_bldg_gdf(
     # and swissALTI3D products (again, EPSG:2056)
     tile_gdf = surface3d_gdf.sjoin(
         alti3d_gdf, how="inner", predicate="contains"
-    ).to_crs(stac.SWISSALTI3D_CRS)
+    ).to_crs(stac.CH_CRS)
 
     # we could do a data frame apply approach returning a series of of building heights
     # that correspond to a single zonal statistic (e.g., "mean"). However, we use

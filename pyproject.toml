@@ -19,6 +19,18 @@ classifiers = [
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13"
 ]
+dependencies = [
+  "geopandas>=1.0.0",
+  "numpy>=2.0.0",
+  "osmnx>=2.0.0",
+  "pooch",
+  "pyregeon",
+  "pystac-client",
+  "rasterio",
+  "rasterstats",
+  "shapely>=2.0.0",
+  "tqdm"
+]
 
 [project.license]
 text = "GPL-3.0"
@@ -39,6 +51,9 @@ doc = [
   "pydata-sphinx-theme",
   "sphinx",
   "sphinxemoji"
+]
+pdal = [
+  "pdal"
 ]
 test = [
   "coverage[toml]",
@@ -122,9 +137,9 @@ requires = [
 
 [tool.tox.env.lint]
 commands = [
-  "python -m build",
-  "sphinx-build docs docs/_build",
-  "twine check dist/*"
+  ["python", "-m", "build"],
+  ["sphinx-build", "docs", "docs/_build"],
+  ["twine", "check", "dist/*"]
 ]
 extras = [
   "dev",
@@ -140,9 +155,6 @@ whitelist_externals = [
 [tool.tox.env_run_base]
 commands = [
   ["pytest", "-s", "--cov=swisstopopy", "--cov-report=xml", "tests"]
-]
-conda_deps = [
-  "gdal>=3.3"
 ]
 extras = [
   "test"

@@ -47,6 +47,7 @@ doc = [
   "myst-parser",
   "nbsphinx",
   "pydata-sphinx-theme",
+  "setuptools",
   "sphinx",
   "sphinxemoji"
 ]

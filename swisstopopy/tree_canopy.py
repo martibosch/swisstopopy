@@ -10,16 +10,14 @@ import numpy.typing as npt
 import pdal
 import pooch
 import rasterio as rio
-from osgeo import gdal
 from pyregeon import CRSType, RegionType
 from pystac_client.item_search import DatetimeLike
+from rasterio import merge
 from tqdm import tqdm
 
-from swisstopopy import stac, utils
+from swisstopopy import settings, stac, utils
 
 __all__ = ["get_tree_canopy_raster"]
-
-DST_OPTIONS = ["TILED:YES"]
 
 
 def rasterize_lidar(
@@ -61,10 +59,10 @@ def get_tree_canopy_raster(
     dst_tree_val: int = 1,
     dst_nodata: int = 0,
     dst_dtype: npt.DTypeLike = "uint32",
-    lidar_tree_values: Sequence[int] | None = None,
+    lidar_tree_values: int | Sequence[int] | None = 3,
     rasterize_lidar_kwargs: utils.KwargsType = None,
     pooch_retrieve_kwargs: utils.KwargsType = None,
-    gdal_warp_kwargs: utils.KwargsType = None,
+    rio_merge_kwargs: utils.KwargsType = None,
 ) -> None:
     """Get tree canopy raster.
 
@@ -96,9 +94,11 @@ def get_tree_canopy_raster(
     lidar_tree_values : int or sequence of int, default 3.
         LiDAR classification values to use for tree canopy. If None, defaults to
         the "Vegetation" class value of swissSURFACE3D, i.e., 3.
-    rasterize_lidar_kwargs, pooch_retrieve_kwargs, gdal_warp_kwargs : mapping, optional
+    rasterize_lidar_kwargs, pooch_retrieve_kwargs, rio_merge_kwargs : mapping, optional
         Additional keyword arguments to respectively pass to
-        `swisstopopy.tree_canopy.rasterize_lidar`, `pooch.retrieve` and `gdal.Warp`.
+        `swisstopopy.tree_canopy.rasterize_lidar`, `pooch.retrieve` and
+        `rasterio.merge.merge`. If the latter is None, the default values from
+        `settings.RIO_MERGE_DST_KWARGS` are used.
     """
     # use the STAC API to get the tree canopy from swissSURFACE3D
     # TODO: dry with `dem.get_dem_raster`?
@@ -126,18 +126,19 @@ def get_tree_canopy_raster(
         output_type="count",
         data_type="uint32",
         nodata=dst_nodata,
-        default_srs=stac.SWISSALTI3D_CRS,
+        default_srs=stac.CH_CRS,
     )
     if pooch_retrieve_kwargs is None:
         pooch_retrieve_kwargs = {}
 
     if isinstance(lidar_tree_values, int):
         lidar_tree_values = [lidar_tree_values]
-    if gdal_warp_kwargs is None:
-        _gdal_warp_kwargs = {}
+
+    if rio_merge_kwargs is None:
+        _rio_merge_kwargs = {}
     else:
-        _gdal_warp_kwargs = gdal_warp_kwargs.copy()
-    _gdal_warp_kwargs.update(creationOptions=DST_OPTIONS)
+        _rio_merge_kwargs = rio_merge_kwargs.copy()
+    _rio_merge_kwargs.update(dst_kwds=settings.RIO_MERGE_DST_KWARGS)
 
     img_filepaths = []
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -165,6 +166,13 @@ def get_tree_canopy_raster(
                     tmp_dir,
                     f"{path.splitext(path.basename(img_filepath))[0]}-counts.tif",
                 )
+                _ = rasterize_lidar(
+                    las_filepath,
+                    counts_filepath,
+                    lidar_tree_values,
+                    **_rasterize_lidar_kwargs,
+                )
+
                 try:
                     _ = rasterize_lidar(
                         las_filepath,
@@ -193,5 +201,9 @@ def get_tree_canopy_raster(
             # add path to list
             img_filepaths.append(img_filepath)
 
-        # creationOptions=dst_options
-        _ = gdal.Warp(dst_filepath, img_filepaths, format="GTiff", **_gdal_warp_kwargs)
+        # merge tiles into the final raster
+        merge.merge(
+            img_filepaths,
+            dst_path=dst_filepath,
+            **_rio_merge_kwargs,
+        )

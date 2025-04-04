@@ -154,8 +154,8 @@ class SwissTopoClient:
             # rather than inheriting from `RegionMixin`, we just use the
             # `_process_region_arg` static method
             self.region = (
-                RegionMixin._process_region_arg(region, region_crs=region_crs)
-                .to_crs(CLIENT_CRS)
+                RegionMixin._process_region_arg(region, crs=region_crs)
+                .to_crs(CLIENT_CRS)["geometry"]
                 .iloc[0]
             )
         else:

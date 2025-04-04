@@ -4,16 +4,14 @@ Generate a DEM for a region using the swissALTI3D product of the swisstopo STAC 
 """
 
 import pooch
-from osgeo import gdal
 from pyregeon import CRSType, RegionType
 from pystac_client.item_search import DatetimeLike
+from rasterio import merge
 from tqdm import tqdm
 
-from swisstopopy import stac, utils
+from swisstopopy import settings, stac, utils
 
 __all__ = ["get_dem_raster"]
-
-DST_OPTIONS = ["TILED:YES"]
 
 
 def get_dem_raster(
@@ -24,7 +22,7 @@ def get_dem_raster(
     alti3d_datetime: DatetimeLike | None = None,
     alti3d_res: float = 2,
     pooch_retrieve_kwargs: utils.KwargsType = None,
-    gdal_warp_kwargs: utils.KwargsType = None,
+    rio_merge_kwargs: utils.KwargsType = None,
 ) -> None:
     """Get digital elevation model (DEM) raster.
 
@@ -43,9 +41,10 @@ def get_dem_raster(
         If None, the latest data for each tile is used.
     alti3d_res : {0.5, 2}, default 2
         Resolution of the swissALTI3D data to get, can be 0.5 or 2 (meters).
-    pooch_retrieve_kwargs, gdal_warp_kwargs : mapping, optional
+    pooch_retrieve_kwargs, rio_merge_kwargs : mapping, optional
         Additional keyword arguments to respectively pass to `pooch.retrieve` and
-        `gdal.Warp`.
+        `rasterio.merge.merge`.  If the latter is None, the default values from
+        `settings.RIO_MERGE_DST_KWARGS` are used.
     """
     # use the STAC API to get the DEM from swissALTI3D
     client = stac.SwissTopoClient(region=region, region_crs=region_crs)
@@ -65,11 +64,11 @@ def get_dem_raster(
     if pooch_retrieve_kwargs is None:
         pooch_retrieve_kwargs = {}
 
-    if gdal_warp_kwargs is None:
-        _gdal_warp_kwargs = {}
+    if rio_merge_kwargs is None:
+        _rio_merge_kwargs = {}
     else:
-        _gdal_warp_kwargs = gdal_warp_kwargs.copy()
-    _gdal_warp_kwargs.update(creationOptions=DST_OPTIONS)
+        _rio_merge_kwargs = rio_merge_kwargs.copy()
+    _rio_merge_kwargs.update(dst_kwds=settings.RIO_MERGE_DST_KWARGS)
 
     img_filepaths = []
     for url in tqdm(
@@ -77,4 +76,9 @@ def get_dem_raster(
     ):
         img_filepath = pooch.retrieve(url, known_hash=None, **pooch_retrieve_kwargs)
         img_filepaths.append(img_filepath)
-    _ = gdal.Warp(dst_filepath, img_filepaths, format="GTiff", **_gdal_warp_kwargs)
+    # merge the images into the final raster
+    merge.merge(
+        img_filepaths,
+        dst_path=dst_filepath,
+        **_rio_merge_kwargs,
+    )

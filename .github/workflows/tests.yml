@@ -32,14 +32,21 @@ jobs:
           environment-name: test-env
           create-args: >-
             python=${{ matrix.python-version }}
+            gdal>=3.3
+            pdal
             pip
+            python-pdal
+            tox
+            tox-current-env
+            tox-gh
 
-      - name: install dependencies
-        run: pip install tox tox-gh-actions
+      - name: install current package with dev/doc/test extras
+        run: pip install ".[dev,doc,test]"
 
       - name: test with tox
-        run: tox
+        run: tox --current-env
         env:
+          TOX_GH_MAJOR_MINOR: ${{ matrix.python-version }}
           CONDA_EXE: mamba
 
       - name: upload coverage reports to Codecov

@@ -19,11 +19,10 @@ Easily filter swisstopo STAC collections based on geospatial extents, dates, fil
 import swisstopopy
 
 region = "Lausanne, Switzerland"
-client = swisstopopy.SwissTopoClient()
+client = swisstopopy.SwissTopoClient(region)
 
 alti3d_gdf = client.gdf_from_collection(
     swisstopopy.SWISSALTI3D_COLLECTION_ID,
-    region=region,
 )
 alti3d_gdf
 ```

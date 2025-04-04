@@ -48,12 +48,9 @@ def get_dem_raster(
         `gdal.Warp`.
     """
     # use the STAC API to get the DEM from swissALTI3D
-    # TODO: dry with `tree_canopy.get_tree_canopy_raster`?
-    # note that we need to reproject the data to the STAC client CRS
-    client = stac.SwissTopoClient()
+    client = stac.SwissTopoClient(region=region, region_crs=region_crs)
     alti3d_gdf = client.gdf_from_collection(
         stac.SWISSALTI3D_COLLECTION_ID,
-        region=region,
         datetime=alti3d_datetime,
     )
 

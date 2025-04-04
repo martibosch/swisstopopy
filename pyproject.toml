@@ -11,7 +11,6 @@ authors = [
   {email = "marti.bosch@epfl.ch", name = "Martí Bosch"}
 ]
 classifiers = [
-  "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
@@ -31,9 +30,8 @@ dependencies = [
   "shapely>=2.0.0",
   "tqdm"
 ]
-
-[project.license]
-text = "GPL-3.0"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [

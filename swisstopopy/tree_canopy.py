@@ -60,6 +60,7 @@ def get_tree_canopy_raster(
     dst_nodata: int = 0,
     dst_dtype: npt.DTypeLike = "uint32",
     lidar_tree_values: int | Sequence[int] | None = 3,
+    cache_lidar: bool = False,
     rasterize_lidar_kwargs: utils.KwargsType = None,
     pooch_retrieve_kwargs: utils.KwargsType = None,
     rio_merge_kwargs: utils.KwargsType = None,
@@ -94,6 +95,9 @@ def get_tree_canopy_raster(
     lidar_tree_values : int or sequence of int, default 3.
         LiDAR classification values to use for tree canopy. If None, defaults to
         the "Vegetation" class value of swissSURFACE3D, i.e., 3.
+    cache_lidar : bool, default False
+        Whether pooch should cache the LiDAR files. If False, the files are downloaded
+        to a temporary directory.
     rasterize_lidar_kwargs, pooch_retrieve_kwargs, rio_merge_kwargs : mapping, optional
         Additional keyword arguments to respectively pass to
         `swisstopopy.tree_canopy.rasterize_lidar`, `pooch.retrieve` and
@@ -106,12 +110,19 @@ def get_tree_canopy_raster(
     # `to_crs`, because `region` may have another CRS and we need the extend in the
     # client's CRS
     client = stac.SwissTopoClient(region, region_crs=region_crs)
-    surface3d_gdf = client.gdf_from_collection(
+    surface3d_gdf = client.get_collection_gdf(
         stac.SWISSSURFACE3D_COLLECTION_ID,
         datetime=surface3d_datetime,
     )
+    if surface3d_gdf.empty:
+        raise ValueError(
+            "Cannot compute tree canopy raster: no data available for the specified "
+            "region and datetime."
+        )
+
     # filter to get zip assets (LiDAR) only
     surface3d_gdf = surface3d_gdf[surface3d_gdf["assets.href"].str.endswith(".zip")]
+
     # if no datetime specified, get the latest data for each tile (location)
     if surface3d_datetime is None:
         surface3d_gdf = stac.get_latest(surface3d_gdf)
@@ -125,7 +136,7 @@ def get_tree_canopy_raster(
         resolution=dst_res,
         output_type="count",
         data_type="uint32",
-        nodata=dst_nodata,
+        nodata=0,
         default_srs=stac.CH_CRS,
     )
     if pooch_retrieve_kwargs is None:
@@ -142,18 +153,13 @@ def get_tree_canopy_raster(
 
     img_filepaths = []
     with tempfile.TemporaryDirectory() as tmp_dir:
-        # TODO: do NOT cache LiDAR files (too big), instead cache the rasterized tree
-        # canopy
         _pooch_retrieve_kwargs = pooch_retrieve_kwargs.copy()
         working_dir = _pooch_retrieve_kwargs.pop("path", tmp_dir)
+        if cache_lidar:
+            las_dir = working_dir
+        else:
+            las_dir = tmp_dir
         for url in tqdm(surface3d_gdf["assets.href"]):
-            las_filepath = pooch.retrieve(
-                url,
-                known_hash=None,
-                processor=pooch.Unzip(),
-                path=tmp_dir,
-                **_pooch_retrieve_kwargs,
-            )[0]  # only one file (i.e., the .las) is expected
             # we need to splitext twice because of the .las.zip extension
             img_filepath = path.join(
                 working_dir,
@@ -161,6 +167,14 @@ def get_tree_canopy_raster(
             )
             # allow resuming
             if not path.exists(img_filepath):
+                # download the LiDAR data
+                las_filepath = pooch.retrieve(
+                    url,
+                    known_hash=None,
+                    processor=pooch.Unzip(),
+                    path=las_dir,
+                    **_pooch_retrieve_kwargs,
+                )[0]  # only one file (i.e., the .las) is expected
                 # use an interim filepath to save the counts, then transform to uint8
                 counts_filepath = path.join(
                     tmp_dir,

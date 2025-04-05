@@ -2,14 +2,14 @@
 
 import warnings
 from collections.abc import Iterator
-from copy import deepcopy
 
 import geopandas as gpd
+import numpy as np
 import pandas as pd
 import pystac_client
 from pyregeon import CRSType, RegionMixin, RegionType
 from pystac_client.item_search import DatetimeLike
-from shapely.geometry import shape
+from shapely import box
 
 # import all constants too
 # __all__ = ["get_latest", "SwissTopoClient"]
@@ -45,17 +45,16 @@ SWISSSURFACE3D_RASTER_COLLECTION_ID = "ch.swisstopo.swisssurface3d-raster"
 # see pystac-client.readthedocs.io/en/stable/tutorials/stac-metadata-viz.html#GeoPandas
 def _items_to_gdf(items: Iterator) -> gpd.GeoDataFrame:
     """Convert a list of STAC Items into a geo-data frame."""
-    _items = []
-    for i in items:
-        _i = deepcopy(i)
-        _i["geometry"] = shape(_i["geometry"])
-        _items.append(_i)
-    gdf = gpd.GeoDataFrame(pd.json_normalize(_items))
-    for field in ["properties.datetime", "properties.created", "properties.updated"]:
-        if field in gdf:
-            gdf[field] = pd.to_datetime(gdf[field])
-    # gdf.set_index("properties.datetime", inplace=True)
-    return gdf
+    # TODO: use polars or stacrs to improve performance
+    gdf = pd.json_normalize(list(items))
+    if gdf.empty:
+        # there is no data for the specified datetime, warn and return empty gdf
+        warnings.warn(
+            "No data available for the specified datetime and collection. Returning an "
+            "empty data frame."
+        )
+        return gdf
+    return gpd.GeoDataFrame(gdf, geometry=box(*np.array(gdf["bbox"].tolist()).T))
 
 
 def _postprocess_items_gdf(items_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
@@ -96,28 +95,56 @@ def _postprocess_items_gdf(items_gdf: gpd.GeoDataFrame) -> gpd.GeoDataFrame:
             axis="columns",
         )
 
-    return pd.concat(
+    gdf = pd.concat(
         [expand_row(row) for _, row in items_gdf.iterrows()], ignore_index=True
     )
 
+    # set datetime columns to datetime
+    for field in ["properties.datetime", "properties.created", "properties.updated"]:
+        if field in gdf:
+            gdf[field] = pd.to_datetime(gdf[field])
+
+    return gdf
+
 
 def get_latest(
-    gdf: gpd.GeoDataFrame,
+    collection_gdf: gpd.GeoDataFrame,
     *,
-    id_col: str = "id",
+    tile_id_col: str = "id",
     datetime_col: str = "properties.datetime",
 ) -> gpd.GeoDataFrame:
-    """Get the latest item for each tile."""
+    """Get the latest item for each tile and file metadata.
+
+    Parameters
+    ----------
+    collection_gdf : geopandas.GeoDataFrame
+        Collection geo-data frame.
+    tile_id_col : str, default "id"
+        Column name for the tile ID.
+    datetime_col : str, default "properties.datetime"
+        Column name for the datetime.
+
+    Returns
+    -------
+    collection_gdf : geopandas.GeoDataFrame
+        Collection geo-data frame with the latest item for each tile and file metadata.
+    """
+    by = [
+        collection_gdf[tile_id_col].str.split("_").str[-1],
+        collection_gdf["assets.type"],
+    ]
+    if "assets.eo:gsd" in collection_gdf:
+        by.append(collection_gdf["assets.eo:gsd"])
     return (
-        gdf.sort_values(
+        collection_gdf.sort_values(
             datetime_col,
             ascending=False,
         )
-        .groupby(gdf[id_col].str.split("_").str[-1])
+        .groupby(by)
         .first()
-        .rename_axis(index={id_col: "tile_id"})
-        .reset_index()
-        .set_crs(gdf.crs)
+        .rename_axis(index={tile_id_col: "tile_id"})
+        .reset_index(drop=True)
+        .set_crs(collection_gdf.crs)
     )
 
 
@@ -162,7 +189,7 @@ class SwissTopoClient:
             # keyword argument in `pystac_client.client.Search`.
             self.region = None
 
-    def gdf_from_collection(
+    def get_collection_gdf(
         self,
         collection_id: str,
         *,
@@ -182,12 +209,21 @@ class SwissTopoClient:
             Coordinate reference system (CRS) of the returned geo-data frame. If None,
             the CRS of the collection tiles will be used - note that this is not
             (necessarily) the same as the CRS of the tile data itself.
+
+        Returns
+        -------
+        collection_gdf : geopandas.GeoDataFrame
+            Geo-data frame of the collection tiles.
         """
         if dst_crs is None:
             dst_crs = self._client.get_collection(collection_id).extra_fields["crs"][0]
         search = self._client.search(
             collections=[collection_id], intersects=self.region, datetime=datetime
         )
-        return gpd.GeoDataFrame(
-            _postprocess_items_gdf(_items_to_gdf(search.items_as_dicts()))
-        ).set_crs(dst_crs)
+        gdf = _items_to_gdf(search.items_as_dicts())
+        if gdf.empty:
+            # the warning has already been raised in `_items_to_gdf`, do not raise it
+            # again, just return an empty data frame
+            # TODO: best approach to handle this? i.e., where to raise the warning?
+            return gdf
+        return gpd.GeoDataFrame(_postprocess_items_gdf(gdf)).set_crs(dst_crs)

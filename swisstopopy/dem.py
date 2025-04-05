@@ -20,7 +20,7 @@ def get_dem_raster(
     *,
     region_crs: CRSType = None,
     alti3d_datetime: DatetimeLike | None = None,
-    alti3d_res: float = 2,
+    alti3d_res: float = 0.5,
     pooch_retrieve_kwargs: utils.KwargsType = None,
     rio_merge_kwargs: utils.KwargsType = None,
 ) -> None:
@@ -39,7 +39,7 @@ def get_dem_raster(
     alti3d_datetime : datetime-like, optional
         Datetime to filter swissALTI3D data, forwarded to `pystac_client.Client.search`.
         If None, the latest data for each tile is used.
-    alti3d_res : {0.5, 2}, default 2
+    alti3d_res : {0.5, 2}, default 0.5
         Resolution of the swissALTI3D data to get, can be 0.5 or 2 (meters).
     pooch_retrieve_kwargs, rio_merge_kwargs : mapping, optional
         Additional keyword arguments to respectively pass to `pooch.retrieve` and
@@ -48,10 +48,15 @@ def get_dem_raster(
     """
     # use the STAC API to get the DEM from swissALTI3D
     client = stac.SwissTopoClient(region, region_crs=region_crs)
-    alti3d_gdf = client.gdf_from_collection(
+    alti3d_gdf = client.get_collection_gdf(
         stac.SWISSALTI3D_COLLECTION_ID,
         datetime=alti3d_datetime,
     )
+    if alti3d_gdf.empty:
+        raise ValueError(
+            "Cannot compute DEM raster: no data available for the specified region and "
+            "datetime."
+        )
 
     # filter to get tiff images only
     alti3d_gdf = alti3d_gdf[alti3d_gdf["assets.href"].str.endswith(".tif")]

@@ -73,9 +73,8 @@ def get_bldg_gdf(
     region: RegionType,
     *,
     region_crs: CRSType = None,
-    surface3d_datetime: DatetimeLike | None = None,
-    alti3d_datetime: DatetimeLike | None = None,
-    alti3d_res: float = 0.5,
+    item_datetime: DatetimeLike | None = None,
+    item_res: float = 0.5,
     **pooch_retrieve_kwargs: utils.KwargsType,
 ) -> gpd.GeoDataFrame:
     """Get buildings geo-data frame with height information.
@@ -88,12 +87,13 @@ def get_bldg_gdf(
         Coordinate reference system (CRS) of the region. Required if `region` is a naive
         geometry or a list of bounding box coordinates. Ignored if `region` already has
         a CRS.
-    surface3d_datetime, alti3d_datetime : datetime-like, optional
-        Datetime to filter swissSURFACE3D and swissALTI3D data respectively, forwarded
-        to `pystac_client.Client.search`. If None, the latest data for each tile is
-        used.
-    alti3d_res : {0.5, 2}, default 0.5
-        Resolution of the swissALTI3D data to get, can be 0.5 or 2 (meters).
+    item_datetime : datetime-like, optional
+        Datetime to filter swissSURFACE3D Raster and swissALTI3D data to use (must be
+        the same for both collections), forwarded to `pystac_client.Client.search`.
+        If None, the latest data for each tile is used.
+    item_res : {0.5, 2}, default 0.5
+        Resolution of the swissSURFACE3D Raster and swissALTI3D data to use (must be the
+        same for both collections), can be 0.5 or 2 (meters).
     pooch_retrieve_kwargs : mapping, optional
         Additional keyword arguments to pass to `pooch.retrieve`.
 
@@ -119,29 +119,29 @@ def get_bldg_gdf(
     # use the STAC API to get building heights from swissSURFACE3D and swissALTI3D
     client = stac.SwissTopoClient(region_gser)
 
+    def _get_and_process_gdf(collection_id):
+        gdf = client.get_collection_gdf(
+            collection_id,
+            datetime=item_datetime,
+        )
+        # filter to get tiff images only
+        gdf = gdf[gdf["assets.href"].str.endswith(".tif")]
+        # filter to get the resolution data at the specified resolution
+        gdf = gdf[gdf["assets.eo:gsd"] == item_res]
+        # if no datetime specified, get the latest data for each tile (location)
+        if item_datetime is None:
+            gdf = stac.get_latest(gdf)
+        return gdf
+
     # surface3d-raster (raster dsm)
-    surface3d_gdf = client.get_collection_gdf(
-        stac.SWISSSURFACE3D_RASTER_COLLECTION_ID,
-        datetime=surface3d_datetime,
+    surface3d_raster_gdf = _get_and_process_gdf(
+        stac.SWISSSURFACE3D_RASTER_COLLECTION_ID
     )
-    # filter to get tiff images only
-    surface3d_gdf = surface3d_gdf[surface3d_gdf["assets.href"].str.endswith(".tif")]
-    # if no datetime specified, get the latest data for each tile (location)
-    if surface3d_datetime is None:
-        surface3d_gdf = stac.get_latest(surface3d_gdf)
 
     # alti3d (raster dem)
-    alti3d_gdf = client.get_collection_gdf(
+    alti3d_gdf = _get_and_process_gdf(
         stac.SWISSALTI3D_COLLECTION_ID,
-        datetime=alti3d_datetime,
     )
-    # filter to get tiff images only
-    alti3d_gdf = alti3d_gdf[alti3d_gdf["assets.href"].str.endswith(".tif")]
-    # filter to get the resolution data at the specified resolution
-    alti3d_gdf = alti3d_gdf[alti3d_gdf["assets.eo:gsd"] == alti3d_res]
-    # if no datetime specified, get the latest data for each tile (location)
-    if alti3d_datetime is None:
-        alti3d_gdf = stac.get_latest(alti3d_gdf)
 
     # compute the building heights as zonal statistics. To that end, we first compute
     # a "building height raster" as the difference between the swissSURFACE3D (surface
@@ -155,7 +155,7 @@ def get_bldg_gdf(
 
     # we need to project the gdf of tiles to the same CRS as the actual swissSURFACE3D
     # and swissALTI3D products (again, EPSG:2056)
-    tile_gdf = surface3d_gdf.sjoin(
+    tile_gdf = surface3d_raster_gdf.sjoin(
         alti3d_gdf, how="inner", predicate="contains"
     ).to_crs(stac.CH_CRS)
 

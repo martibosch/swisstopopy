@@ -49,8 +49,8 @@ class TestSwissTopoPy(unittest.TestCase):
     def test_buildings(self):
         for kwargs in [
             {},
-            {"surface3d_datetime": "2019", "alti3d_datetime": "2019"},
-            {"alti3d_res": 2},
+            {"item_datetime": "2019"},
+            {"item_res": 2},
         ]:
             bldg_gdf = swisstopopy.get_bldg_gdf(self.region, **kwargs)
             # test that we get a non empty geo-data frame

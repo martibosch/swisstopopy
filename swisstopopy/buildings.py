@@ -92,7 +92,7 @@ def get_bldg_gdf(
         Datetime to filter swissSURFACE3D and swissALTI3D data respectively, forwarded
         to `pystac_client.Client.search`. If None, the latest data for each tile is
         used.
-    alti3d_res : {0.5, 2}, default 2
+    alti3d_res : {0.5, 2}, default 0.5
         Resolution of the swissALTI3D data to get, can be 0.5 or 2 (meters).
     pooch_retrieve_kwargs : mapping, optional
         Additional keyword arguments to pass to `pooch.retrieve`.
@@ -106,21 +106,21 @@ def get_bldg_gdf(
     # 1. we first need to project the region to OSM CRS (EPSG:4326) to query via osmnx
     # 2. we drop the "node" column to keep only the "way" and "relation" columns that
     # correspond to polygon geometries
-    region_gser = RegionMixin._process_region_arg(region, crs=region_crs)
+    region_gser = RegionMixin._process_region_arg(region, crs=region_crs)["geometry"]
     bldg_gdf = (
         ox.features_from_polygon(
             region_gser.to_crs(ox.settings.default_crs).iloc[0],
             tags=OSMNX_TAGS,
         )
         .to_crs(stac.CH_CRS)
-        .drop("node")
+        .drop("node", errors="ignore")
     )
 
     # use the STAC API to get building heights from swissSURFACE3D and swissALTI3D
     client = stac.SwissTopoClient(region_gser)
 
     # surface3d-raster (raster dsm)
-    surface3d_gdf = client.gdf_from_collection(
+    surface3d_gdf = client.get_collection_gdf(
         stac.SWISSSURFACE3D_RASTER_COLLECTION_ID,
         datetime=surface3d_datetime,
     )
@@ -131,7 +131,7 @@ def get_bldg_gdf(
         surface3d_gdf = stac.get_latest(surface3d_gdf)
 
     # alti3d (raster dem)
-    alti3d_gdf = client.gdf_from_collection(
+    alti3d_gdf = client.get_collection_gdf(
         stac.SWISSALTI3D_COLLECTION_ID,
         datetime=alti3d_datetime,
     )

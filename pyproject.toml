@@ -64,6 +64,9 @@ test = [
 [project.urls]
 Repository = "https://github.com/martibosch/swisstopopy"
 
+[tool.codespell]
+skip = "docs/overview.ipynb"
+
 [tool.commitizen]
 major_version_zero = true
 name = "cz_conventional_commits"

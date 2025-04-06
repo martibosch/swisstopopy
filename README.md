@@ -38,152 +38,13 @@ latest_alti3d_gdf = swisstopopy.get_latest(alti3d_gdf)
 latest_alti3d_gdf.head()
 ```
 
-<div>
-    <table border="1" class="dataframe">
-	<thead>
-	    <tr style="text-align: right;">
-		<th></th>
-		<th>id</th>
-		<th>collection</th>
-		<th>type</th>
-		<th>stac_version</th>
-		<th>bbox</th>
-		<th>stac_extensions</th>
-		<th>links</th>
-		<th>geometry.type</th>
-		<th>geometry.coordinates</th>
-		<th>properties.datetime</th>
-		<th>properties.created</th>
-		<th>properties.updated</th>
-		<th>geometry</th>
-		<th>assets.checksum:multihash</th>
-		<th>assets.created</th>
-		<th>assets.eo:gsd</th>
-		<th>assets.href</th>
-		<th>assets.proj:epsg</th>
-		<th>assets.type</th>
-		<th>assets.updated</th>
-	    </tr>
-	</thead>
-	<tbody>
-	    <tr>
-		<th>0</th>
-		<td>swissalti3d_2021_2532-1151</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5525481, 46.5068432, 6.565723, 46.5159392]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5526955, 46.5068432], [6.565723, 46.50694...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:46:12.695971+00:00</td>
-		<td>2025-01-18 02:03:21.314035+00:00</td>
-		<td>POLYGON ((6.56572 46.50684, 6.56572 46.51594, ...</td>
-		<td>1220A1EB829DC0AEFA4B10F687F5C05FC2AA4F59F6B622...</td>
-		<td>2021-09-02T19:09:22.472399Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>application/x.ascii-xyz+zip</td>
-		<td>2025-01-18T00:05:10.539193Z</td>
-	    </tr>
-	    <tr>
-		<th>1</th>
-		<td>swissalti3d_2021_2532-1151</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5525481, 46.5068432, 6.565723, 46.5159392]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5526955, 46.5068432], [6.565723, 46.50694...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:46:12.695971+00:00</td>
-		<td>2025-01-18 02:03:21.314035+00:00</td>
-		<td>POLYGON ((6.56572 46.50684, 6.56572 46.51594, ...</td>
-		<td>12203761E09265F46BC92A89AB60D7003202574ADBED5B...</td>
-		<td>2021-09-02T16:46:13.207732Z</td>
-		<td>2.0</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>application/x.ascii-xyz+zip</td>
-		<td>2025-01-17T23:06:08.845852Z</td>
-	    </tr>
-	    <tr>
-		<th>2</th>
-		<td>swissalti3d_2021_2532-1151</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5525481, 46.5068432, 6.565723, 46.5159392]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5526955, 46.5068432], [6.565723, 46.50694...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:46:12.695971+00:00</td>
-		<td>2025-01-18 02:03:21.314035+00:00</td>
-		<td>POLYGON ((6.56572 46.50684, 6.56572 46.51594, ...</td>
-		<td>1220B9AD77D6DD070409D209F5ADF17EC7253FC3FE6CEE...</td>
-		<td>2021-09-03T00:35:29.891683Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-18T01:04:21.184877Z</td>
-	    </tr>
-	    <tr>
-		<th>3</th>
-		<td>swissalti3d_2021_2532-1151</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5525481, 46.5068432, 6.565723, 46.5159392]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5526955, 46.5068432], [6.565723, 46.50694...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:46:12.695971+00:00</td>
-		<td>2025-01-18 02:03:21.314035+00:00</td>
-		<td>POLYGON ((6.56572 46.50684, 6.56572 46.51594, ...</td>
-		<td>122093E32E6D175B9F148409FCAA8708073303A8E94A8E...</td>
-		<td>2021-09-03T01:36:23.594881Z</td>
-		<td>2.0</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-18T02:03:21.314035Z</td>
-	    </tr>
-	    <tr>
-		<th>4</th>
-		<td>swissalti3d_2021_2532-1152</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5524006, 46.5158382, 6.5655778, 46.5249343]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5525481, 46.5158382], [6.5655778, 46.5159...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:56:28.144164+00:00</td>
-		<td>2025-01-18 02:16:20.318007+00:00</td>
-		<td>POLYGON ((6.56558 46.51584, 6.56558 46.52493, ...</td>
-		<td>122020D17CB98AAE4FECDBC563D0673AF8797EFD2D74C6...</td>
-		<td>2021-09-02T20:24:35.219858Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>application/x.ascii-xyz+zip</td>
-		<td>2025-01-18T00:17:16.038110Z</td>
-	    </tr>
-	</tbody>
-    </table>
-</div>
+|     | id                         | collection               | ... | geometry                                          |
+| --- | -------------------------- | ------------------------ | --- | ------------------------------------------------- |
+| 0   | swissalti3d_2021_2532-1151 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56572 46.50684, 6.56572 46.51594, ... |
+| 1   | swissalti3d_2021_2532-1151 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56572 46.50684, 6.56572 46.51594, ... |
+| 2   | swissalti3d_2021_2532-1151 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56572 46.50684, 6.56572 46.51594, ... |
+| 3   | swissalti3d_2021_2532-1151 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56572 46.50684, 6.56572 46.51594, ... |
+| 4   | swissalti3d_2021_2532-1152 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56558 46.51584, 6.56558 46.52493, ... |
 
 or filter by other metadata attributes such as ground resolution and/or file extensions:
 
@@ -194,175 +55,14 @@ alti3d_gdf[
 ]
 ```
 
-<div>
-    <table border="1" class="dataframe">
-	<thead>
-	    <tr style="text-align: right;">
-		<th></th>
-		<th>id</th>
-		<th>collection</th>
-		<th>type</th>
-		<th>stac_version</th>
-		<th>bbox</th>
-		<th>stac_extensions</th>
-		<th>links</th>
-		<th>geometry.type</th>
-		<th>geometry.coordinates</th>
-		<th>properties.datetime</th>
-		<th>properties.created</th>
-		<th>properties.updated</th>
-		<th>geometry</th>
-		<th>assets.checksum:multihash</th>
-		<th>assets.created</th>
-		<th>assets.eo:gsd</th>
-		<th>assets.href</th>
-		<th>assets.proj:epsg</th>
-		<th>assets.type</th>
-		<th>assets.updated</th>
-	    </tr>
-	</thead>
-	<tbody>
-	    <tr>
-		<th>0</th>
-		<td>swissalti3d_2019_2532-1151</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5525481, 46.5068432, 6.565723, 46.5159392]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5526955, 46.5068432], [6.565723, 46.50694...</td>
-		<td>2019-01-01 00:00:00+00:00</td>
-		<td>2021-02-10 10:47:06.111266+00:00</td>
-		<td>2025-01-16 14:51:17.195380+00:00</td>
-		<td>POLYGON ((6.56572 46.50684, 6.56572 46.51594, ...</td>
-		<td>1220BEF35C33758E7EA4744487F4D8248AABFD50018615...</td>
-		<td>2021-02-10T10:47:06.715269Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-14T19:16:07.401260Z</td>
-	    </tr>
-	    <tr>
-		<th>4</th>
-		<td>swissalti3d_2019_2532-1152</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5524006, 46.5158382, 6.5655778, 46.5249343]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5525481, 46.5158382], [6.5655778, 46.5159...</td>
-		<td>2019-01-01 00:00:00+00:00</td>
-		<td>2021-02-10 10:49:41.964859+00:00</td>
-		<td>2025-01-16 15:06:19.535010+00:00</td>
-		<td>POLYGON ((6.56558 46.51584, 6.56558 46.52493, ...</td>
-		<td>12205790D9862A7BFB265E59B08814D8E44227441DD80B...</td>
-		<td>2021-02-10T10:49:42.615492Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-14T19:26:09.858728Z</td>
-	    </tr>
-	    <tr>
-		<th>8</th>
-		<td>swissalti3d_2019_2533-1152</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5654325, 46.5159392, 6.5786075, 46.5250338]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5655778, 46.5159392], [6.5786075, 46.5160...</td>
-		<td>2019-01-01 00:00:00+00:00</td>
-		<td>2021-02-10 10:49:43.859413+00:00</td>
-		<td>2025-01-16 15:06:20.632461+00:00</td>
-		<td>POLYGON ((6.57861 46.51594, 6.57861 46.52503, ...</td>
-		<td>1220788F6FB6067294E92CE78ACBC070B25CB9632D5910...</td>
-		<td>2021-02-10T10:49:44.535488Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-14T19:26:10.809428Z</td>
-	    </tr>
-	    <tr>
-		<th>12</th>
-		<td>swissalti3d_2021_2532-1151</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5525481, 46.5068432, 6.565723, 46.5159392]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5526955, 46.5068432], [6.565723, 46.50694...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:46:12.695971+00:00</td>
-		<td>2025-01-18 02:03:21.314035+00:00</td>
-		<td>POLYGON ((6.56572 46.50684, 6.56572 46.51594, ...</td>
-		<td>1220B9AD77D6DD070409D209F5ADF17EC7253FC3FE6CEE...</td>
-		<td>2021-09-03T00:35:29.891683Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-18T01:04:21.184877Z</td>
-	    </tr>
-	    <tr>
-		<th>16</th>
-		<td>swissalti3d_2021_2532-1152</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5524006, 46.5158382, 6.5655778, 46.5249343]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5525481, 46.5158382], [6.5655778, 46.5159...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:56:28.144164+00:00</td>
-		<td>2025-01-18 02:16:20.318007+00:00</td>
-		<td>POLYGON ((6.56558 46.51584, 6.56558 46.52493, ...</td>
-		<td>122089C474AEF62CC4692D7A944AFC0A13162D3DD8D0CF...</td>
-		<td>2021-09-03T00:49:42.276133Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-18T01:18:11.426964Z</td>
-	    </tr>
-	    <tr>
-		<th>20</th>
-		<td>swissalti3d_2021_2533-1152</td>
-		<td>ch.swisstopo.swissalti3d</td>
-		<td>Feature</td>
-		<td>0.9.0</td>
-		<td>[6.5654325, 46.5159392, 6.5786075, 46.5250338]</td>
-		<td>[https://stac-extensions.github.io/timestamps/...</td>
-		<td>[{'rel': 'self', 'href': 'https://data.geo.adm...</td>
-		<td>Polygon</td>
-		<td>[[[6.5655778, 46.5159392], [6.5786075, 46.5160...</td>
-		<td>2021-01-01 00:00:00+00:00</td>
-		<td>2021-09-02 16:56:34.537212+00:00</td>
-		<td>2025-01-18 02:17:06.919621+00:00</td>
-		<td>POLYGON ((6.57861 46.51594, 6.57861 46.52503, ...</td>
-		<td>1220B8B7EA9C14DD41021131A873BD5B76DC0642CBC374...</td>
-		<td>2021-09-03T00:49:54.457903Z</td>
-		<td>0.5</td>
-		<td>https://data.geo.admin.ch/ch.swisstopo.swissal...</td>
-		<td>2056.0</td>
-		<td>image/tiff; application=geotiff; profile=cloud...</td>
-		<td>2025-01-18T01:18:15.270233Z</td>
-	    </tr>
-	</tbody>
-    </table>
-</div>
+|     | id                         | collection               | ... | geometry                                          |
+| --- | -------------------------- | ------------------------ | --- | ------------------------------------------------- |
+| 0   | swissalti3d_2019_2532-1151 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56572 46.50684, 6.56572 46.51594, ... |
+| 4   | swissalti3d_2019_2532-1152 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56558 46.51584, 6.56558 46.52493, ... |
+| 8   | swissalti3d_2019_2533-1152 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.57861 46.51594, 6.57861 46.52503, ... |
+| 12  | swissalti3d_2021_2532-1151 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56572 46.50684, 6.56572 46.51594, ... |
+| 16  | swissalti3d_2021_2532-1152 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.56558 46.51584, 6.56558 46.52493, ... |
+| 20  | swissalti3d_2021_2533-1152 | ch.swisstopo.swissalti3d | ... | POLYGON ((6.57861 46.51594, 6.57861 46.52503, ... |
 
 ### STAC data processing
 
@@ -385,14 +85,20 @@ See the [overview notebook](https://swisstopopy.readthedocs.io/en/latest/overvie
 
 ## Installation
 
-You can install swisstopopy using pip:
+Like many other geospatial Python packages, swisstopopy requires many base C libraries that cannot be installed with pip. Accordingly, the best way to install swisstopopy is to use conda/mamba, i.e., in a given conda environment, run:
 
 ```bash
-# or pip install -e git+ssh://git@github.com/martibosch/swisstopopy
-pip install https://github.com/martibosch/swisstopopy/archive/main.zip
+# or mamba install -c conda-forge geopandas
+conda install -c conda-forge geopandas
 ```
 
-Note that the `get_tree_canopy_raster` requires [PDAL and its Python bindings](https://pdal.io/en/2.8.4/python.html), which are not installed by default with swisstopopy. The [easiest way to install such requirements is using conda/mamba](https://pdal.io/en/latest/python.html#install-using-conda), e.g.: `conda install -c conda-forge python-pdal`.
+Within the same conda environment, you can then install swisstopopy using pip:
+
+```bash
+pip install swisstopopy
+```
+
+Note that the `get_tree_canopy_raster` requires [PDAL and its Python bindings](https://pdal.io/en/2.8.4/python.html), which are not installed by default with swisstopopy. Like with geopandas, the [easiest way to install such requirements is using conda/mamba](https://pdal.io/en/latest/python.html#install-using-conda), e.g.: `conda install -c conda-forge python-pdal`.
 
 ## Notes
 

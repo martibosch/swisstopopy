@@ -1,5 +1,5 @@
 # CHANGELOG
 
-## v0.0.0 - 2025-04-04
+## v0.1.0 - 2025-04-06
 
-- initial commit
+- first release

@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "swisstopopy"
-version = "0.0.0"
+version = "0.1.0"
 description = "swisstopo geospatial Python utilities"
 readme = "README.md"
 authors = [

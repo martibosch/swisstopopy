@@ -18,8 +18,6 @@ from tqdm import tqdm
 
 from swisstopopy import stac, utils
 
-tqdm.pandas()
-
 __all__ = ["get_bldg_gdf"]
 
 OSMNX_TAGS = {"building": True}

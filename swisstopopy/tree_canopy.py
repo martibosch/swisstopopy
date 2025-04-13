@@ -180,12 +180,6 @@ def get_tree_canopy_raster(
                     tmp_dir,
                     f"{path.splitext(path.basename(img_filepath))[0]}-counts.tif",
                 )
-                _ = rasterize_lidar(
-                    las_filepath,
-                    counts_filepath,
-                    lidar_tree_values,
-                    **_rasterize_lidar_kwargs,
-                )
 
                 try:
                     _ = rasterize_lidar(

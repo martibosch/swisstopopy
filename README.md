@@ -2,7 +2,7 @@
 [![Documentation Status](https://readthedocs.org/projects/swisstopopy/badge/?version=latest)](https://swisstopopy.readthedocs.io/en/latest/?badge=latest)
 [![CI/CD](https://github.com/martibosch/swisstopopy/actions/workflows/tests.yml/badge.svg)](https://github.com/martibosch/swisstopopy/blob/main/.github/workflows/tests.yml)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/martibosch/swisstopopy/main.svg)](https://results.pre-commit.ci/latest/github/martibosch/swisstopopy/main)
-[![codecov](https://codecov.io/gh/martibosch/swisstopopy/branch/main/graph/badge.svg?token=hKoSSRn58a)](https://codecov.io/gh/martibosch/swisstopopy)
+[![codecov](https://codecov.io/gh/martibosch/swisstopopy/branch/main/graph/badge.svg?token=KXJYk4KcNs)](https://codecov.io/gh/martibosch/swisstopopy)
 [![GitHub license](https://img.shields.io/github/license/martibosch/swisstopopy.svg)](https://github.com/martibosch/swisstopopy/blob/main/LICENSE)
 
 # swisstopopy

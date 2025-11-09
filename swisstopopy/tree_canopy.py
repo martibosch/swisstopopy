@@ -1,5 +1,6 @@
 """Tree canopy."""
 
+import logging as lg
 import os
 import tempfile
 from collections.abc import Sequence
@@ -7,7 +8,6 @@ from os import path
 
 import numpy as np
 import numpy.typing as npt
-import pdal
 import pooch
 import rasterio as rio
 from pyregeon import CRSType, RegionType
@@ -17,7 +17,19 @@ from tqdm import tqdm
 
 from swisstopopy import settings, stac, utils
 
+try:
+    import pdal
+except ImportError:
+    pdal = None
+
+
 __all__ = ["get_tree_canopy_raster"]
+
+_pdal_warning_msg = """
+The tree canopy module requires the PDAL package and its Python bindings. You can get
+them by installing the `pdal` and `python-pdal` packages from conda-forge using
+conda/mamba or pixi.
+"""
 
 
 def rasterize_lidar(
@@ -104,6 +116,12 @@ def get_tree_canopy_raster(
         `rasterio.merge.merge`. If the latter is None, the default values from
         `settings.RIO_MERGE_DST_KWARGS` are used.
     """
+    # first of all check that we have pdal
+    if pdal is None:
+        lg.warning(_pdal_warning_msg)
+        lg.warning("Returning `None`.")
+        return None
+
     # use the STAC API to get the tree canopy from swissSURFACE3D
     # TODO: dry with `dem.get_dem_raster`?
     # note that we need to pass the STAC client's CRS to both `_process_region_arg` and

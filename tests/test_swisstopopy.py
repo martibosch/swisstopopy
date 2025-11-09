@@ -1,13 +1,49 @@
 """Tests for swisstopopy."""
 
+import importlib
+import logging as lg
+import sys
 import tempfile
 import unittest
+from collections.abc import Generator
 from os import path
 
 import geopandas as gpd
+import pytest
 import rasterio as rio
 
 import swisstopopy
+
+
+@pytest.fixture
+def unload_pdal(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+    """Fake that pdal is not installed.
+
+    Source: https://stackoverflow.com/a/79280624
+    """
+    modules = {
+        module: sys.modules[module]
+        for module in list(sys.modules)
+        if module.startswith("pdal") or module == "pdal"
+    }
+    for module in modules:
+        # ensure that `pdal` and all its submodules are not loadable
+        monkeypatch.setitem(sys.modules, module, None)
+
+    with pytest.raises(ImportError):
+        # ensure that `pdal` cannot be imported
+        import pdal  # noqa: F401
+
+    import swisstopopy.tree_canopy as tree_canopy
+
+    importlib.reload(tree_canopy)
+    yield  # undo the monkeypatch
+    for module, original in modules.items():
+        if original is None:
+            sys.modules.pop(module, None)
+        else:
+            sys.modules[module] = original
+    importlib.reload(tree_canopy)  # make `pdal` available again
 
 
 class TestSwissTopoPy(unittest.TestCase):
@@ -129,4 +165,25 @@ class TestSwissTopoPy(unittest.TestCase):
             self._test_wrong_datetime(
                 swisstopopy.get_tree_canopy_raster,
                 {"surface3d_datetime": "2018"},
+            )
+
+    @pytest.mark.usefixtures("unload_pdal")
+    def test_tree_canopy_no_pdal(self):
+        # test that calling `get_tree_canopy_raster` without pdal installed returns None
+        # and logs a warning
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            dst_filepath = path.join(tmp_dir, "foo.tif")
+            with self.assertLogs(level=lg.WARNING) as cm:
+                result = swisstopopy.get_tree_canopy_raster(
+                    self.region,
+                    dst_filepath,
+                )
+            self.assertIsNone(result)
+            self.assertTrue(
+                any("PDAL" in message for message in cm.output),
+                "Expected a PDAL warning to be logged.",
+            )
+            self.assertTrue(
+                any("Returning `None`." in message for message in cm.output),
+                "Expected a warning about returning None to be logged.",
             )

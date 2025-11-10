@@ -70,7 +70,7 @@ def get_tree_canopy_raster(
     dst_res: float = 2,
     dst_tree_val: int = 1,
     dst_nodata: int = 0,
-    dst_dtype: npt.DTypeLike = "uint32",
+    dst_dtype: npt.DTypeLike = "uint8",
     lidar_tree_values: int | Sequence[int] | None = 3,
     cache_lidar: bool = False,
     rasterize_lidar_kwargs: utils.KwargsType = None,
@@ -102,7 +102,7 @@ def get_tree_canopy_raster(
         Value to assign to tree canopy pixels.
     dst_nodata : int, default 0
         Value to assign to no data pixels.
-    dst_dtype : dtype-like, default "uint32"
+    dst_dtype : dtype-like, default "uint8"
         Data type of the output raster.
     lidar_tree_values : int or sequence of int, default 3.
         LiDAR classification values to use for tree canopy. If None, defaults to

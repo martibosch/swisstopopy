@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [v0.3.0] - 2026-02-06
+
+- no changes, release workflow triggered by mistake
+
 ## [v0.2.0] - 2026-02-05
 
 ### :boom: BREAKING CHANGES

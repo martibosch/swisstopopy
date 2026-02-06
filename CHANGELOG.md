@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## [v0.4.0] - 2026-02-06
+
+### :boom: BREAKING CHANGES
+
+- due to [`b812a8b`](https://github.com/martibosch/swisstopopy/commit/b812a8b3183b19ef9b4f7587178c6caadad89cda) - surface3d_gdf and dst_dir kwargs in get_tree_canopy_raster *(commit by [@martibosch](https://github.com/martibosch))*:
+
+  surface3d_gdf and dst_dir kwargs in get_tree_canopy_raster
+
+### :sparkles: New Features
+
+- [`b812a8b`](https://github.com/martibosch/swisstopopy/commit/b812a8b3183b19ef9b4f7587178c6caadad89cda) - surface3d_gdf and dst_dir kwargs in get_tree_canopy_raster *(commit by [@martibosch](https://github.com/martibosch))*
+
 ## [v0.3.0] - 2026-02-06
 
 - no changes, release workflow triggered by mistake
@@ -26,3 +38,4 @@
 
 - first release
   \[v0.2.0\]: https://github.com/martibosch/swisstopopy/compare/v0.1.0...v0.2.0
+  \[v0.4.0\]: https://github.com/martibosch/swisstopopy/compare/v0.3.0...v0.4.0

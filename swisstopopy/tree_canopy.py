@@ -6,6 +6,7 @@ import tempfile
 from collections.abc import Sequence
 from os import path
 
+import geopandas as gpd
 import numpy as np
 import numpy.typing as npt
 import pooch
@@ -61,9 +62,11 @@ def rasterize_lidar(
 
 
 def get_tree_canopy_raster(
-    region: RegionType,
-    dst_filepath: utils.PathType,
     *,
+    region: RegionType | None = None,
+    surface3d_gdf: gpd.GeoDataFrame | None = None,
+    dst_filepath: utils.PathType | None = None,
+    dst_dir: utils.PathType | None = None,
     region_crs: CRSType = None,
     surface3d_datetime: DatetimeLike | None = None,  # "2019/2019",
     count_threshold: int = 32,
@@ -81,17 +84,30 @@ def get_tree_canopy_raster(
 
     Parameters
     ----------
-    region : region-like
+    region : region-like, optional
         Region to get the data for. Can any argument accepted by the pyregeon library.
-    dst_filepath : path-like
-        Output file path to save the raster to.
+        Required unless `surface3d_gdf` is provided.
+    surface3d_gdf : geopandas.GeoDataFrame, optional
+        Geo-data frame of swissSURFACE3D items to use directly instead of querying the
+        STAC API for `region`. All the assets will be processed so it should already be
+        filtered to the desired items. Ignored if `region` is provided but required
+        otherwise.
+    dst_filepath : path-like, optional
+        Output file path to save the merged raster to. Required unless `dst_dir` is
+        provided.
+    dst_dir : path-like, optional
+        Output directory to save individual tile rasters to. If provided, no merging is
+        performed and individual tiles are written to this directory with the same
+        basename as the LiDAR assets but a `.tif` extension. Ignored if `dst_filepath`
+        but required otherwise.
     region_crs : crs-like, optional
         Coordinate reference system (CRS) of the region. Required if `region` is a naive
         geometry or a list of bounding box coordinates. Ignored if `region` already has
-        a CRS.
+        a CRS or when providing `surface3d_gdf` instead of `region`.
     surface3d_datetime : datetime-like, optional
         Datetime to filter swissSURFACE3D data, forwarded to
         `pystac_client.Client.search`. If None, the latest data for each tile is used.
+        Ignored when providing `surface3d_gdf` instead of `region`.
     count_threshold : int, default 32
         Minimum number of vegetation LiDAR points to consider a pixel as tree canopy.
         Depends on the target pixel resolution `dst_res`. Note that swissSURFACE3D has a
@@ -113,7 +129,8 @@ def get_tree_canopy_raster(
     rasterize_lidar_kwargs, pooch_retrieve_kwargs, rio_merge_kwargs : mapping, optional
         Additional keyword arguments to respectively pass to
         `swisstopopy.tree_canopy.rasterize_lidar`, `pooch.retrieve` and
-        `rasterio.merge.merge`. If the latter is None, the default values from
+        `rasterio.merge.merge`. The merge kwargs are only used when `dst_filepath` is
+        provided; if they are None, the default values from
         `settings.RIO_MERGE_DST_KWARGS` are used.
     """
     # first of all check that we have pdal
@@ -122,28 +139,41 @@ def get_tree_canopy_raster(
         lg.warning("Returning `None`.")
         return None
 
-    # use the STAC API to get the tree canopy from swissSURFACE3D
-    # TODO: dry with `dem.get_dem_raster`?
-    # note that we need to pass the STAC client's CRS to both `_process_region_arg` and
-    # `to_crs`, because `region` may have another CRS and we need the extend in the
-    # client's CRS
-    client = stac.SwissTopoClient(region, region_crs=region_crs)
-    surface3d_gdf = client.get_collection_gdf(
-        stac.SWISSSURFACE3D_COLLECTION_ID,
-        datetime=surface3d_datetime,
-    )
-    if surface3d_gdf.empty:
-        raise ValueError(
-            "Cannot compute tree canopy raster: no data available for the specified "
-            "region and datetime."
+    if region is None and surface3d_gdf is None:
+        raise ValueError("Either `region` or `surface3d_gdf` must be provided.")
+
+    if dst_filepath is None and dst_dir is None:
+        raise ValueError("Either `dst_filepath` or `dst_dir` must be provided.")
+
+    if region is not None:
+        # use the STAC API to get the tree canopy from swissSURFACE3D
+        # TODO: dry with `dem.get_dem_raster`?
+        # note that we need to pass the STAC client's CRS to both `_process_region_arg`
+        # and `to_crs`, because `region` may have another CRS and we need the extend in
+        # the client's CRS
+        client = stac.SwissTopoClient(region, region_crs=region_crs)
+        surface3d_gdf = client.get_collection_gdf(
+            stac.SWISSSURFACE3D_COLLECTION_ID,
+            datetime=surface3d_datetime,
         )
+        if surface3d_gdf.empty:
+            raise ValueError(
+                "Cannot compute tree canopy raster: no data available for the "
+                "specified region and datetime."
+            )
 
-    # filter to get zip assets (LiDAR) only
-    surface3d_gdf = surface3d_gdf[surface3d_gdf["assets.href"].str.endswith(".zip")]
+        # filter to get zip assets (LiDAR) only
+        surface3d_gdf = surface3d_gdf[surface3d_gdf["assets.href"].str.endswith(".zip")]
 
-    # if no datetime specified, get the latest data for each tile (location)
-    if surface3d_datetime is None:
-        surface3d_gdf = stac.get_latest(surface3d_gdf)
+        # if no datetime specified, get the latest data for each tile (location)
+        if surface3d_datetime is None:
+            surface3d_gdf = stac.get_latest(surface3d_gdf)
+    else:
+        if surface3d_gdf.empty:
+            raise ValueError(
+                "Cannot compute tree canopy raster: no data available in "
+                "`surface3d_gdf`."
+            )
 
     if rasterize_lidar_kwargs is None:
         _rasterize_lidar_kwargs = {}
@@ -163,11 +193,12 @@ def get_tree_canopy_raster(
     if isinstance(lidar_tree_values, int):
         lidar_tree_values = [lidar_tree_values]
 
-    if rio_merge_kwargs is None:
-        _rio_merge_kwargs = {}
-    else:
-        _rio_merge_kwargs = rio_merge_kwargs.copy()
-    _rio_merge_kwargs.update(dst_kwds=settings.RIO_MERGE_DST_KWARGS)
+    if dst_filepath is not None:
+        if rio_merge_kwargs is None:
+            _rio_merge_kwargs = {}
+        else:
+            _rio_merge_kwargs = rio_merge_kwargs.copy()
+        _rio_merge_kwargs.update(dst_kwds=settings.RIO_MERGE_DST_KWARGS)
 
     img_filepaths = []
     with tempfile.TemporaryDirectory() as tmp_dir:
@@ -177,10 +208,15 @@ def get_tree_canopy_raster(
             las_dir = working_dir
         else:
             las_dir = tmp_dir
+        if dst_filepath is None:
+            os.makedirs(dst_dir, exist_ok=True)
+            output_dir = dst_dir
+        else:
+            output_dir = working_dir
         for url in tqdm(surface3d_gdf["assets.href"]):
             # we need to splitext twice because of the .las.zip extension
             img_filepath = path.join(
-                working_dir,
+                output_dir,
                 f"{path.splitext(path.splitext(path.basename(url))[0])[0]}.tif",
             )
             # allow resuming
@@ -227,9 +263,10 @@ def get_tree_canopy_raster(
             # add path to list
             img_filepaths.append(img_filepath)
 
-        # merge tiles into the final raster
-        merge.merge(
-            img_filepaths,
-            dst_path=dst_filepath,
-            **_rio_merge_kwargs,
-        )
+        if dst_filepath is not None:
+            # merge tiles into the final raster
+            merge.merge(
+                img_filepaths,
+                dst_path=dst_filepath,
+                **_rio_merge_kwargs,
+            )

@@ -21,7 +21,7 @@ jobs:
       - name: build
         run: pixi run build
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           path: dist/*
 

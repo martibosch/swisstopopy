@@ -8,7 +8,7 @@ version = "0.4.0"
 description = "swisstopo geospatial Python utilities"
 readme = "README.md"
 authors = [
-  {email = "marti.bosch@epfl.ch", name = "Martí Bosch"}
+  { email = "marti.bosch@epfl.ch", name = "Martí Bosch" }
 ]
 classifiers = [
   "Natural Language :: English",
@@ -90,11 +90,11 @@ pdal = ">=2.9.3,<3"
 gdal = ">=3.12.1,<4"
 
 [tool.pixi.environments]
-default = {features = ["default"], solve-group = "default"}
-dev = {features = ["dev"], solve-group = "default"}
-doc = {features = ["doc", "pdal"], solve-group = "default"}
-test = {features = ["pdal", "test"], solve-group = "default"}
-pdal = {features = ["pdal"], solve-group = "default"}
+default = { features = ["default"], solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+doc = { features = ["doc", "pdal"], solve-group = "default" }
+test = { features = ["pdal", "test"], solve-group = "default" }
+pdal = { features = ["pdal"], solve-group = "default" }
 
 [tool.pixi.feature.dev.tasks]
 build = "uv build"
